@@ -19,6 +19,7 @@ import com.x.processplatform.core.entity.element.Application;
 import com.x.processplatform.core.entity.element.Begin;
 import com.x.processplatform.core.entity.element.Process;
 import com.x.processplatform.service.processing.Business;
+import com.x.processplatform.service.processing.MessageFactory;
 import com.x.processplatform.service.processing.WorkDataHelper;
 
 /**
@@ -42,14 +43,12 @@ class ActionCreate extends BaseAction {
 			if ((null != jsonElement) && jsonElement.isJsonObject()) {
 				WorkDataHelper workDataHelper = new WorkDataHelper(emc, work);
 				workDataHelper.update(jsonElement);
-//				if (XGsonBuilder.extract(jsonElement, Work.dataChanged_FIELDNAME, Boolean.class, false)) {
-//					work.setDataChanged(true);
-//				}
 			}
 			emc.persist(work, CheckPersistType.all);
 			emc.commit();
 			Wo wo = new Wo();
 			wo.setId(work.getId());
+			MessageFactory.work_create(work);
 			result.setData(wo);
 		}
 		return result;
@@ -72,7 +71,6 @@ class ActionCreate extends BaseAction {
 		work.setProcessAlias(process.getAlias());
 		work.setJob(StringTools.uniqueToken());
 		work.setStartTime(now);
-		// work.setExecuted(false);
 		work.setErrorRetry(0);
 		work.setWorkStatus(WorkStatus.start);
 		work.setDestinationActivity(begin.getId());

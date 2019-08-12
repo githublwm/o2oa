@@ -15,7 +15,7 @@ import com.x.base.core.project.gson.XGsonBuilder;
 import com.x.base.core.project.jaxrs.StandardJaxrsAction;
 import com.x.cms.assemble.control.Business;
 import com.x.cms.assemble.control.service.CategoryInfoServiceAdv;
-import com.x.cms.assemble.control.service.DocumentInfoServiceAdv;
+import com.x.cms.assemble.control.service.DocumentQueryService;
 import com.x.cms.assemble.control.service.UserManagerService;
 import com.x.cms.core.entity.Document;
 import com.x.query.core.entity.Item;
@@ -30,7 +30,7 @@ public class BaseAction extends StandardJaxrsAction {
 	protected Ehcache cache = ApplicationCache.instance().getCache( Item.class);
 	protected UserManagerService userManagerService = new UserManagerService();
 	protected CategoryInfoServiceAdv categoryInfoServiceAdv = new CategoryInfoServiceAdv();
-	protected DocumentInfoServiceAdv documentServiceAdv = new DocumentInfoServiceAdv();
+	protected DocumentQueryService documentServiceAdv = new DocumentQueryService();
 	
 	JsonElement getData(Business business, String job, String... paths) throws Exception {
 		JsonElement jsonElement = null;
@@ -121,6 +121,7 @@ public class BaseAction extends StandardJaxrsAction {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	void deleteData(Business business, Document document, String... paths) throws Exception {
 		List<Item> exists = business.itemFactory().listWithDocmentWithPath(document.getId(), paths);
 		if (exists.isEmpty()) {
@@ -130,8 +131,8 @@ public class BaseAction extends StandardJaxrsAction {
 		for (Item o : exists) {
 			business.entityManagerContainer().remove(o);
 		}
-		if (paths.length > 0) {
-			if (NumberUtils.isNumber(paths[paths.length - 1])) {
+		if ( paths.length > 0 ) {
+			if ( NumberUtils.isNumber(paths[paths.length - 1])) {
 				int position = paths.length - 1;
 				for (Item o : business.itemFactory().listWithDocmentWithPathWithAfterLocation(document.getId(),
 						NumberUtils.toInt(paths[position]), paths)) {

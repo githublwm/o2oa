@@ -15,6 +15,7 @@ import com.x.base.core.entity.JpaObject;
 import com.x.base.core.project.bean.WrapCopier;
 import com.x.base.core.project.bean.WrapCopierFactory;
 import com.x.base.core.project.gson.GsonPropertyObject;
+import com.x.base.core.project.gson.XGsonBuilder;
 import com.x.base.core.project.tools.ListTools;
 
 public class Data extends ListOrderedMap<String, Object> {
@@ -155,6 +156,7 @@ public class Data extends ListOrderedMap<String, Object> {
 		private String serial;
 		private String activityType;
 		private String activityName;
+		private String manualTaskIdentityText;
 		/** 来自workCompleted的结束时间 */
 		private Date completedTime;
 		/** 来自workCompleted的结束时间月份 */
@@ -336,6 +338,14 @@ public class Data extends ListOrderedMap<String, Object> {
 			this.completed = completed;
 		}
 
+		public String getManualTaskIdentityText() {
+			return manualTaskIdentityText;
+		}
+
+		public void setManualTaskIdentityText(String manualTaskIdentityText) {
+			this.manualTaskIdentityText = manualTaskIdentityText;
+		}
+
 	}
 
 	public static class DataAttachment extends GsonPropertyObject {
@@ -397,4 +407,5 @@ public class Data extends ListOrderedMap<String, Object> {
 				o -> (!StringUtils.equals(WORK_PROPERTY, o)) && (!StringUtils.equals(ATTACHMENTLIST_PROPERTY, o)))
 				.count() == 0;
 	}
+	
 }

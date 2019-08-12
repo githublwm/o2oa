@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -150,6 +149,10 @@ public class Logger {
 		}
 	}
 
+	public int level() {
+		return level;
+	}
+
 	public void error(Exception e) {
 		String id = StringTools.uniqueToken();
 		StringBuilder sb = this.create(ERROR, id);
@@ -159,7 +162,7 @@ public class Logger {
 		sb.append("]");
 		String stackTraceString = ExceptionUtils.getStackTrace(e);
 		if (!(e instanceof PromptException)) {
-			sb.append(SystemUtils.LINE_SEPARATOR);
+			sb.append(System.lineSeparator());
 			sb.append(stackTraceString);
 		}
 		System.err.println(sb.toString());
@@ -202,7 +205,7 @@ public class Logger {
 				request.getRemoteHost(), request.getRemoteAddr(), headString, bodyString };
 		sb.append(format(HTTPMESSAGEFORMAT, arr));
 		if (!(e instanceof PromptException)) {
-			sb.append(SystemUtils.LINE_SEPARATOR);
+			sb.append(System.lineSeparator());
 			sb.append(stackTraceString);
 		}
 		System.err.println(sb.toString());
@@ -280,6 +283,12 @@ public class Logger {
 			}
 		}
 		return sb.toString();
+	}
+
+	public Audit audit(EffectivePerson effectivePerson) {
+		Audit o = new Audit(effectivePerson.getDistinguishedName(), effectivePerson.getRemoteAddress(),
+				effectivePerson.getUri(), effectivePerson.getUserAgent(), this.name);
+		return o;
 	}
 
 }

@@ -2,7 +2,8 @@ package com.x.cms.assemble.control.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.x.base.core.container.EntityManagerContainer;
 import com.x.base.core.entity.JpaObject;
@@ -10,7 +11,6 @@ import com.x.base.core.entity.annotation.CheckPersistType;
 import com.x.base.core.entity.annotation.CheckRemoveType;
 import com.x.base.core.project.http.EffectivePerson;
 import com.x.cms.assemble.control.Business;
-import com.x.cms.core.entity.Document;
 import com.x.cms.core.entity.element.View;
 import com.x.cms.core.entity.element.ViewFieldConfig;
 
@@ -76,16 +76,16 @@ public class ViewService {
 	}
 	
 	public View get( EntityManagerContainer emc, String id ) throws Exception {
-		if( id == null || id.isEmpty() ){
+		if( StringUtils.isEmpty( id ) ){
 			throw new Exception("id is null!");
 		}
 		return emc.find(id, View.class );
 	}
 
-	public List<Document> nextPageDocuemntView(EntityManagerContainer emc, String id, Integer count, List<String> viewAbleDocIds, Map<String, Object> condition) throws Exception {
-		Business business = new Business(emc);
-		return business.getViewFactory().nextPageDocuemntView( id, count, viewAbleDocIds, condition );
-	}
+//	public List<Document> nextPageDocuemntView(EntityManagerContainer emc, String id, Integer count, List<String> viewAbleDocIds, Map<String, Object> condition) throws Exception {
+//		Business business = new Business(emc);
+//		return business.getViewFactory().nextPageDocuemntView( id, count, viewAbleDocIds, condition );
+//	}
 
 	public List<String> listFieldConfigByView(EntityManagerContainer emc, String viewId) throws Exception {
 		Business business = new Business(emc);

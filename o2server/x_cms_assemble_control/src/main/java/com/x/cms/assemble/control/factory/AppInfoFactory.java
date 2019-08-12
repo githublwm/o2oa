@@ -18,6 +18,7 @@ import com.x.cms.assemble.control.AbstractFactory;
 import com.x.cms.assemble.control.Business;
 import com.x.cms.core.entity.AppInfo;
 import com.x.cms.core.entity.AppInfo_;
+import com.x.cms.core.entity.tools.CriteriaBuilderTools;
 
 /**
  * 应用信息表基础功能服务类
@@ -29,10 +30,13 @@ public class AppInfoFactory extends AbstractFactory {
 	public AppInfoFactory(Business business) throws Exception {
 		super(business);
 	}
-
-	// @MethodDescribe("获取指定Id的Appinfo应用信息对象")
+	
 	public AppInfo get(String id) throws Exception {
 		return this.entityManagerContainer().find(id, AppInfo.class, ExceptionWhen.none);
+	}
+	
+	public AppInfo flag(String flag) throws Exception {
+		return this.entityManagerContainer().flag(flag, AppInfo.class );
 	}
 
 	public List<String> listAllIds(String documentType) throws Exception {
@@ -47,32 +51,29 @@ public class AppInfoFactory extends AbstractFactory {
 		}
 		return em.createQuery(cq).getResultList();
 	}
-
-	@SuppressWarnings("unused")
-	// @MethodDescribe("列示全部的Appinfo应用信息列表")
-	public List<AppInfo> listAll(String documentType) throws Exception {
+	
+	public List<AppInfo> listAll( String appType, String documentType) throws Exception {
 		EntityManager em = this.entityManagerContainer().get(AppInfo.class);
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<AppInfo> cq = cb.createQuery(AppInfo.class);
 		Root<AppInfo> root = cq.from(AppInfo.class);
+		Predicate p = null;
 		if (StringUtils.isNotEmpty(documentType) && !"全部".equals(documentType)) {
-			Predicate p = cb.equal(root.get(AppInfo_.documentType), documentType);
-			return em.createQuery(cq.where(p)).getResultList();
+			p = CriteriaBuilderTools.predicate_and(cb, p, cb.equal(root.get(AppInfo_.documentType), documentType) );
 		}
-		return em.createQuery(cq).getResultList();
+		if (StringUtils.isNotEmpty(appType) &&!StringUtils.equals( "未分类",appType )) {
+			p = CriteriaBuilderTools.predicate_and(cb, p, cb.equal(root.get(AppInfo_.appType), appType) );
+		}
+		if (StringUtils.isNotEmpty(appType) &&StringUtils.equals( "未分类",appType )) {
+			p = CriteriaBuilderTools.predicate_and(cb, p, 
+					CriteriaBuilderTools.predicate_or(
+							cb, cb.isNull(root.get(AppInfo_.appType)), 
+							cb.equal(root.get(AppInfo_.appType), ""))
+			);
+		}
+		return em.createQuery(cq.where(p)).getResultList();
 	}
 
-	// @MethodDescribe("列示指定Id的Appinfo应用信息列表")
-//	public List<AppInfo> list(List<String> ids) throws Exception {
-//		EntityManager em = this.entityManagerContainer().get(AppInfo.class);
-//		CriteriaBuilder cb = em.getCriteriaBuilder();
-//		CriteriaQuery<AppInfo> cq = cb.createQuery(AppInfo.class);
-//		Root<AppInfo> root = cq.from(AppInfo.class);
-//		Predicate p = root.get(AppInfo_.id).in(ids);
-//		return em.createQuery(cq.where(p)).getResultList();
-//	}
-
-	// @MethodDescribe("对应用信息进行模糊查询，并且返回信息列表.")
 	public List<String> listLike(String keyStr) throws Exception {
 		String str = keyStr.replaceAll("_", "\\\\_");
 		str = str.replaceAll("%", "\\\\%");
@@ -481,5 +482,35 @@ public class AppInfoFactory extends AbstractFactory {
 		}
 		return o;
 	}
+
+	public List<String> listAllAppType() throws Exception {
+		EntityManager em = this.entityManagerContainer().get(AppInfo.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = cb.createQuery(String.class);
+		Root<AppInfo> root = cq.from(AppInfo.class);
+		Predicate p = cb.isNotNull( root.get(AppInfo_.appType));
+		cq.select(root.get(AppInfo_.appType)).distinct(true);
+		return em.createQuery(cq.where(p)).getResultList();
+	}
+
+	public Long countAppInfoWithAppType(String type) throws Exception {
+		EntityManager em = this.entityManagerContainer().get(AppInfo.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+		Root<AppInfo> root = cq.from(AppInfo.class);
+		Predicate p = cb.equal( root.get(AppInfo_.appType), type );
+		cq.select(cb.count(root));
+		return em.createQuery(cq.where(p)).getSingleResult();
+	}
 	
+	public Long countAppInfoWithOutAppType() throws Exception {
+		EntityManager em = this.entityManagerContainer().get(AppInfo.class);
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+		Root<AppInfo> root = cq.from(AppInfo.class);
+		Predicate p = cb.isNull( root.get(AppInfo_.appType) );
+		p = cb.or( p, cb.equal( root.get(AppInfo_.appType), ""));
+		cq.select(cb.count(root));
+		return em.createQuery(cq.where(p)).getSingleResult();
+	}
 }

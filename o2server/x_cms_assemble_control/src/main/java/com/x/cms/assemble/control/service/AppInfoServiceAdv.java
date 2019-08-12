@@ -22,7 +22,7 @@ public class AppInfoServiceAdv {
 	private AppInfoService appInfoService = new AppInfoService();
 
 	public AppInfo get( String id ) throws Exception {
-		if (id == null || id.isEmpty()) {
+		if ( StringUtils.isEmpty(id )) {
 			throw new Exception("id is null.");
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
@@ -44,7 +44,7 @@ public class AppInfoServiceAdv {
 	}
 
 	public Long countCategoryByAppId(String id, String documentType) throws Exception {
-		if (id == null || id.isEmpty()) {
+		if ( StringUtils.isEmpty(id )) {
 			throw new Exception("id is null.");
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
@@ -54,20 +54,20 @@ public class AppInfoServiceAdv {
 		}
 	}
 
-	public void delete(String id, EffectivePerson currentPerson, String documentType, Integer maxCount ) throws Exception {
-		if (id == null || id.isEmpty()) {
+	public void delete( String id, EffectivePerson currentPerson ) throws Exception {
+		if ( StringUtils.isEmpty(id )) {
 			throw new Exception("id is null.");
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
-			appInfoService.delete(emc, id, documentType, maxCount);
+			appInfoService.delete(emc, id );
 		} catch (Exception e) {
 			throw e;
 		}
 	}
 
-	public List<AppInfo> listAll(String documentType) throws Exception {
+	public List<AppInfo> listAll( String appType, String documentType) throws Exception {
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
-			return appInfoService.listAll(emc, documentType);
+			return appInfoService.listAll(emc, appType, documentType);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -98,21 +98,15 @@ public class AppInfoServiceAdv {
 			throw new Exception("appInfo is null.");
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
-			appInfo = appInfoService.save( emc, appInfo );
-			// 检查一下该应用栏目是否存在管理者
-			if( ListTools.isEmpty( appInfo.getManageablePersonList()) 
-					&& ListTools.isEmpty( appInfo.getManageableUnitList()) 
-					&&ListTools.isEmpty( appInfo.getManageableGroupList())) {
-				//如果不存在，则将当前登录者作为应用栏目的管理者
-				emc.beginTransaction( AppInfo.class );
+			// 检查一下该应用栏目是否存在管理者, 如果不存在，则将当前登录者作为应用栏目的管理者
+			if( ListTools.isEmpty( appInfo.getManageablePersonList())  && ListTools.isEmpty( appInfo.getManageableUnitList())  &&ListTools.isEmpty( appInfo.getManageableGroupList())) {
 				if( "xadmin".equalsIgnoreCase( currentPerson.getName() )) {
 					appInfo.addManageablePerson( "xadmin" );
 				}else {
 					appInfo.addManageablePerson( currentPerson.getDistinguishedName() );
 				}
-				emc.check( appInfo, CheckPersistType.all );
-				emc.commit();
 			}
+			appInfo = appInfoService.save( emc, appInfo );
 		} catch (Exception e) {
 			throw e;
 		}
@@ -120,7 +114,7 @@ public class AppInfoServiceAdv {
 	}
 
 	public List<String> listByAppName(String appName) throws Exception {
-		if (appName == null || appName.isEmpty()) {
+		if ( StringUtils.isEmpty(appName )) {
 			return null;
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
@@ -142,7 +136,7 @@ public class AppInfoServiceAdv {
 	}
 	
 	public List<String> getWithAlias(String appAlias) throws Exception {
-		if (appAlias == null || appAlias.isEmpty()) {
+		if ( StringUtils.isEmpty(appAlias )) {
 			return null;
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
@@ -153,13 +147,13 @@ public class AppInfoServiceAdv {
 	}
 	
 	public void saveAppInfoIcon( String appId, String base64, String iconMainColor ) throws Exception {
-		if (appId == null || appId.isEmpty()) {
+		if ( StringUtils.isEmpty(appId )) {
 			throw new Exception("appId is null");
 		}
-		if (base64 == null || base64.isEmpty()) {
+		if ( StringUtils.isEmpty(base64 )) {
 			throw new Exception("base64 is null");
 		}
-		if (iconMainColor == null || iconMainColor.isEmpty()) {
+		if ( StringUtils.isEmpty(iconMainColor)) {
 			throw new Exception("iconMainColor is null");
 		}
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
@@ -289,7 +283,7 @@ public class AppInfoServiceAdv {
 	public Boolean isAppInfoManager(String appId, String distinguishedName) throws Exception {
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
 			AppInfo appInfo = emc.find( appId, AppInfo.class );
-			if( ListTools.isNotEmpty( appInfo.getManageablePersonList() )){
+			if( appInfo != null && ListTools.isNotEmpty( appInfo.getManageablePersonList() )){
 				if( appInfo.getManageablePersonList().contains( distinguishedName )) {
 					return true;
 				}
@@ -310,20 +304,22 @@ public class AppInfoServiceAdv {
 	public Boolean isAppInfoPublisher(String appId, String personName, List<String> unitNames, List<String> groupNames ) throws Exception {
 		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
 			AppInfo appInfo = emc.find( appId, AppInfo.class );
-			if( ListTools.isNotEmpty( appInfo.getPublishablePersonList() )){
-				if( appInfo.getManageablePersonList().contains( personName )) {
-					return true;
-				}				
-				if( appInfo.getPublishablePersonList().contains( personName )) {
-					return true;
-				}
-				appInfo.getPublishableUnitList().retainAll( unitNames );
-				if( ListTools.isNotEmpty( appInfo.getPublishableUnitList() )) {
-					return true;
-				}
-				appInfo.getPublishableGroupList().retainAll( groupNames );
-				if( ListTools.isNotEmpty( appInfo.getPublishableGroupList() )) {
-					return true;
+			if( appInfo != null ) {
+				if( ListTools.isNotEmpty( appInfo.getPublishablePersonList() )){
+					if( appInfo.getManageablePersonList().contains( personName )) {
+						return true;
+					}				
+					if( appInfo.getPublishablePersonList().contains( personName )) {
+						return true;
+					}
+					appInfo.getPublishableUnitList().retainAll( unitNames );
+					if( ListTools.isNotEmpty( appInfo.getPublishableUnitList() )) {
+						return true;
+					}
+					appInfo.getPublishableGroupList().retainAll( groupNames );
+					if( ListTools.isNotEmpty( appInfo.getPublishableGroupList() )) {
+						return true;
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -384,6 +380,35 @@ public class AppInfoServiceAdv {
 			emc.beginTransaction( AppInfo.class );
 			emc.persist( appInfo, CheckPersistType.all );
 			emc.commit();
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	/**
+	 * 获取系统内已经存在的所有的栏目类别
+	 * @return
+	 * @throws Exception 
+	 */
+	public List<String> listAllAppType() throws Exception {
+		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
+			return appInfoService.listAllAppType(emc);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	public Long countAppInfoWithAppType(String type) throws Exception {
+		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
+			return appInfoService.countAppInfoWithAppType(emc, type);
+		} catch (Exception e) {
+			throw e;
+		}
+	}	
+	
+	public Long countAppInfoWithOutAppType() throws Exception {
+		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
+			return appInfoService.countAppInfoWithOutAppType(emc );
 		} catch (Exception e) {
 			throw e;
 		}

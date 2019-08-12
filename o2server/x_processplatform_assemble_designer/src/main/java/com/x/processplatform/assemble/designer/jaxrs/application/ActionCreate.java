@@ -16,6 +16,7 @@ import com.x.base.core.project.http.EffectivePerson;
 import com.x.base.core.project.jaxrs.WoId;
 import com.x.base.core.project.organization.OrganizationDefinition;
 import com.x.processplatform.assemble.designer.Business;
+import com.x.processplatform.assemble.designer.MessageFactory;
 import com.x.processplatform.core.entity.element.Application;
 
 class ActionCreate extends BaseAction {
@@ -25,8 +26,8 @@ class ActionCreate extends BaseAction {
 			ActionResult<Wo> result = new ActionResult<>();
 			Wi wi = this.convertToWrapIn(jsonElement, Wi.class);
 			Business business = new Business(emc);
-			/** 这里的角色多一个 RoleDefinition.ProcessPlatformCreator */
-			if ((effectivePerson.isNotManager()) & (!business.organization().person().hasRole(effectivePerson,
+			/* 这里的角色多一个 RoleDefinition.ProcessPlatformCreator */
+			if ((effectivePerson.isNotManager()) && (!business.organization().person().hasRole(effectivePerson,
 					OrganizationDefinition.Manager, OrganizationDefinition.ProcessPlatformManager,
 					OrganizationDefinition.ProcessPlatformCreator))) {
 				throw new ExceptionInsufficientPermission(effectivePerson.getDistinguishedName());
@@ -43,6 +44,7 @@ class ActionCreate extends BaseAction {
 			Wo wo = new Wo();
 			wo.setId(application.getId());
 			result.setData(wo);
+			MessageFactory.application_create(application);
 			return result;
 		}
 	}

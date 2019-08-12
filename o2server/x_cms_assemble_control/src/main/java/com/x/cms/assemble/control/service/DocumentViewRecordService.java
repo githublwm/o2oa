@@ -1,5 +1,6 @@
 package com.x.cms.assemble.control.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -8,13 +9,14 @@ import org.apache.commons.lang3.StringUtils;
 import com.x.base.core.container.EntityManagerContainer;
 import com.x.base.core.entity.annotation.CheckRemoveType;
 import com.x.base.core.project.jaxrs.StandardJaxrsAction;
+import com.x.base.core.project.tools.ListTools;
 import com.x.cms.assemble.control.Business;
 import com.x.cms.core.entity.DocumentViewRecord;
 
 public class DocumentViewRecordService {
 
 	public List<DocumentViewRecord> list( EntityManagerContainer emc, List<String> ids ) throws Exception {
-		if( ids == null || ids.isEmpty() ){
+		if( ListTools.isEmpty( ids ) ){
 			return null;
 		}
 		Business business = new Business( emc );
@@ -22,19 +24,40 @@ public class DocumentViewRecordService {
 	}
 	
 	public List<String> listByDocument( EntityManagerContainer emc, String docId ) throws Exception {
-		if( docId == null || docId.isEmpty() ){
+		if( StringUtils.isEmpty( docId ) ){
 			return null;
 		}
 		Business business = new Business( emc );
 		return business.documentViewRecordFactory().listByDocument(docId);
 	}
 	
-	public List<String> listByPerson( EntityManagerContainer emc, String personId ) throws Exception {
-		if( personId == null || personId.isEmpty() ){
+	public List<String> listByPerson( EntityManagerContainer emc, String personId, Integer maxCount ) throws Exception {
+		if( StringUtils.isEmpty( personId ) ){
 			return null;
 		}
+		if( maxCount == null || maxCount == 0 ) {
+			maxCount = 50;
+		}
 		Business business = new Business( emc );
-		return business.documentViewRecordFactory().listByPerson( personId );
+		return business.documentViewRecordFactory().listByPerson( personId, maxCount );
+	}
+	
+	public List<String> listDocIdsByPerson( EntityManagerContainer emc, String personId, Integer maxCount ) throws Exception {
+		if( StringUtils.isEmpty( personId ) ){
+			return null;
+		}
+		if( maxCount == null || maxCount == 0 ) {
+			maxCount = 50;
+		}
+		Business business = new Business( emc );
+		List<String> docIds = new ArrayList<>();
+		List<DocumentViewRecord> records =  business.documentViewRecordFactory().listRecordsByPerson( personId, maxCount );
+		if( ListTools.isNotEmpty(  records)) {
+			for( DocumentViewRecord record : records ) {
+				docIds.add( record.getDocumentId() );
+			}
+		}
+		return docIds;
 	}
 
 	public void deleteByDocument( EntityManagerContainer emc, String docId ) throws Exception {

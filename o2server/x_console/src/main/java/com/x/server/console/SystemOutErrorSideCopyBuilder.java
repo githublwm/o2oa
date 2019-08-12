@@ -1,9 +1,7 @@
 package com.x.server.console;
 
-import java.io.File;
 import java.io.PrintStream;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.util.RolloverFileOutputStream;
 
 import com.x.base.core.project.config.Config;
@@ -20,10 +18,8 @@ public class SystemOutErrorSideCopyBuilder {
 	public static void start() throws Exception {
 		stdout = System.out;
 		stderr = System.err;
-		File logDir = new File(Config.base(), "logs");
-		FileUtils.forceMkdir(logDir);
-		RolloverFileOutputStream rolloverFileOutputStream = new RolloverFileOutputStream(logDir + "/yyyy_mm_dd.out.log",
-				false, 180);
+		RolloverFileOutputStream rolloverFileOutputStream = new RolloverFileOutputStream(
+				Config.dir_logs(true).getAbsolutePath() + "/yyyy_mm_dd.out.log", false, Config.currentNode().logSize());
 		rolloverFilePrintStream = new PrintStream(rolloverFileOutputStream);
 		SideCopyPrintStream sideCopyOut = new SideCopyPrintStream(stdout, rolloverFilePrintStream);
 		SideCopyPrintStream sideCopyErr = new SideCopyPrintStream(stderr, rolloverFilePrintStream);

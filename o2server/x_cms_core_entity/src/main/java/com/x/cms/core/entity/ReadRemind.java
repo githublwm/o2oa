@@ -12,7 +12,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.openjpa.persistence.jdbc.Index;
 
 import com.x.base.core.entity.AbstractPersistenceProperties;
@@ -21,7 +20,6 @@ import com.x.base.core.entity.SliceJpaObject;
 import com.x.base.core.entity.annotation.CheckPersist;
 import com.x.base.core.entity.annotation.ContainerEntity;
 import com.x.base.core.project.annotation.FieldDescribe;
-import com.x.base.core.project.tools.DateTools;
 
 /**
  * 文档发布消息提醒信息表
@@ -31,15 +29,15 @@ import com.x.base.core.project.tools.DateTools;
  */
 @Entity
 @ContainerEntity
-@Table(name = PersistenceProperties.Review.table, uniqueConstraints = {
-		@UniqueConstraint(name = PersistenceProperties.Review.table + JpaObject.IndexNameMiddle
+@Table(name = PersistenceProperties.ReadRemind.table, uniqueConstraints = {
+		@UniqueConstraint(name = PersistenceProperties.ReadRemind.table + JpaObject.IndexNameMiddle
 				+ JpaObject.DefaultUniqueConstraintSuffix, columnNames = { JpaObject.IDCOLUMN,
 						JpaObject.CREATETIMECOLUMN, JpaObject.UPDATETIMECOLUMN, JpaObject.SEQUENCECOLUMN }) })
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class ReadRemind extends SliceJpaObject {
 
 	private static final long serialVersionUID = -570048661936488247L;
-	private static final String TABLE = PersistenceProperties.Review.table;
+	private static final String TABLE = PersistenceProperties.ReadRemind.table;
 
 	public String getId() {
 		return id;

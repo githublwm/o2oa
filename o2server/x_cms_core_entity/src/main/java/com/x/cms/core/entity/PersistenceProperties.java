@@ -75,5 +75,25 @@ public final class PersistenceProperties extends AbstractPersistenceProperties {
 	public static class ReadRemind {
 		public static final String table = "CMS_READREMIND";
 	}
+	
+	public static class DocumentCommentInfo {
+		public static final String table = "CMS_DOCUMENT_COMMENTINFO";
+	}
+	
+	public static class DocumentCommentContent {
+		public static final String table = "CMS_DOCUMENT_COMMENTCONTENT";
+	}
+	
+	public static class DocumentCommend {
+		public static final String table = "CMS_DOCUMENT_COMMEND";
+	}
+	
+	public static class DocumentCommentCommend {
+		public static final String table = "CMS_DOCUMENT_COMMENTCOMMEND";
+	}
+	
+	public static class CmsBatchOperation {
+		public static final String table = "CMS_BATCH_OPERATION";
+	}
 
 }

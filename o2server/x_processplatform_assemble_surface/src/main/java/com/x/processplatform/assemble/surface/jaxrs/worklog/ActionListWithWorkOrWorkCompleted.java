@@ -157,7 +157,8 @@ class ActionListWithWorkOrWorkCompleted extends BaseAction {
 						WorkLog.arrivedActivityType_FIELDNAME, WorkLog.arrivedActivityName_FIELDNAME,
 						WorkLog.arrivedActivityAlias_FIELDNAME, WorkLog.arrivedActivityToken_FIELDNAME,
 						WorkLog.arrivedTime_FIELDNAME, WorkLog.routeName_FIELDNAME, WorkLog.connected_FIELDNAME,
-						WorkLog.splitting_FIELDNAME),
+						WorkLog.splitting_FIELDNAME, WorkLog.fromGroup_FIELDNAME, WorkLog.arrivedGroup_FIELDNAME,
+						WorkLog.fromOpinionGroup_FIELDNAME, WorkLog.arrivedOpinionGroup_FIELDNAME),
 				JpaObject.FieldsInvisible);
 
 		private List<WoTask> taskList = new ArrayList<>();
@@ -208,22 +209,23 @@ class ActionListWithWorkOrWorkCompleted extends BaseAction {
 
 		static WrapCopier<Task, WoTask> copier = WrapCopierFactory.wo(Task.class, WoTask.class,
 				ListTools.toList(Task.id_FIELDNAME, Task.person_FIELDNAME, Task.unit_FIELDNAME,
-						Task.routeName_FIELDNAME, Task.opinion_FIELDNAME, Task.startTime_FIELDNAME,
-						Task.activityName_FIELDNAME, Task.activityToken_FIELDNAME),
+						Task.routeName_FIELDNAME, Task.opinion_FIELDNAME, Task.opinionLob_FIELDNAME,
+						Task.startTime_FIELDNAME, Task.activityName_FIELDNAME, Task.activityToken_FIELDNAME),
 				null);
 	}
 
 	public static class WoTaskCompleted extends TaskCompleted {
 
 		private static final long serialVersionUID = -4432508672641778924L;
-		
+
 		static WrapCopier<TaskCompleted, WoTaskCompleted> copier = WrapCopierFactory.wo(TaskCompleted.class,
 				WoTaskCompleted.class,
 				ListTools.toList(TaskCompleted.id_FIELDNAME, TaskCompleted.person_FIELDNAME,
 						TaskCompleted.unit_FIELDNAME, TaskCompleted.routeName_FIELDNAME,
-						TaskCompleted.opinion_FIELDNAME, TaskCompleted.startTime_FIELDNAME,
-						TaskCompleted.activityName_FIELDNAME, TaskCompleted.completedTime_FIELDNAME,
-						TaskCompleted.activityToken_FIELDNAME, TaskCompleted.mediaOpinion_FIELDNAME),
+						TaskCompleted.opinion_FIELDNAME, TaskCompleted.opinionLob_FIELDNAME,
+						TaskCompleted.startTime_FIELDNAME, TaskCompleted.activityName_FIELDNAME,
+						TaskCompleted.completedTime_FIELDNAME, TaskCompleted.activityToken_FIELDNAME,
+						TaskCompleted.mediaOpinion_FIELDNAME),
 				null);
 	}
 
@@ -233,7 +235,8 @@ class ActionListWithWorkOrWorkCompleted extends BaseAction {
 
 		static WrapCopier<Read, WoRead> copier = WrapCopierFactory.wo(Read.class, WoRead.class,
 				ListTools.toList(Read.id_FIELDNAME, Read.person_FIELDNAME, Read.unit_FIELDNAME, Read.opinion_FIELDNAME,
-						Read.startTime_FIELDNAME, Read.activityName_FIELDNAME, Read.activityToken_FIELDNAME),
+						Read.opinionLob_FIELDNAME, Read.startTime_FIELDNAME, Read.activityName_FIELDNAME,
+						Read.activityToken_FIELDNAME),
 				null);
 	}
 
@@ -245,8 +248,9 @@ class ActionListWithWorkOrWorkCompleted extends BaseAction {
 				WoReadCompleted.class,
 				ListTools.toList(ReadCompleted.id_FIELDNAME, ReadCompleted.person_FIELDNAME,
 						ReadCompleted.unit_FIELDNAME, ReadCompleted.opinion_FIELDNAME,
-						ReadCompleted.startTime_FIELDNAME, ReadCompleted.activityName_FIELDNAME,
-						ReadCompleted.completedTime_FIELDNAME, ReadCompleted.activityToken_FIELDNAME),
+						ReadCompleted.opinionLob_FIELDNAME, ReadCompleted.startTime_FIELDNAME,
+						ReadCompleted.activityName_FIELDNAME, ReadCompleted.completedTime_FIELDNAME,
+						ReadCompleted.activityToken_FIELDNAME),
 				null);
 	}
 

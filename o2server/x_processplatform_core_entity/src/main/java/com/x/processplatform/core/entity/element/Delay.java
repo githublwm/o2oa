@@ -23,7 +23,6 @@ import org.apache.openjpa.persistence.jdbc.ElementColumn;
 import org.apache.openjpa.persistence.jdbc.ElementIndex;
 import org.apache.openjpa.persistence.jdbc.Index;
 
-import com.x.base.core.entity.AbstractPersistenceProperties;
 import com.x.base.core.entity.JpaObject;
 import com.x.base.core.entity.annotation.CheckPersist;
 import com.x.base.core.entity.annotation.ContainerEntity;
@@ -68,6 +67,16 @@ public class Delay extends Activity {
 
 	/* flag标志位 */
 	/* Entity 默认字段结束 */
+
+	@FieldDescribe("分组")
+	@CheckPersist(allowEmpty = true)
+	@Column(length = JpaObject.length_255B, name = ColumnNamePrefix + group_FIELDNAME)
+	private String group;
+
+	@FieldDescribe("意见分组")
+	@CheckPersist(allowEmpty = true)
+	@Column(length = JpaObject.length_255B, name = ColumnNamePrefix + opinionGroup_FIELDNAME)
+	private String opinionGroup;
 
 	@FieldDescribe("节点名称.")
 	@Column(length = length_255B, name = ColumnNamePrefix + name_FIELDNAME)
@@ -116,7 +125,7 @@ public class Delay extends Activity {
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle
 			+ readIdentityList_FIELDNAME, joinIndex = @Index(name = TABLE + IndexNameMiddle + readIdentityList_FIELDNAME
 					+ JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = length_255B, name = ColumnNamePrefix + readIdentityList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + readIdentityList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -126,7 +135,7 @@ public class Delay extends Activity {
 	@PersistentCollection(fetch = FetchType.EAGER)
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle + readUnitList_FIELDNAME, joinIndex = @Index(name = TABLE
 			+ IndexNameMiddle + readUnitList_FIELDNAME + JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = length_255B, name = ColumnNamePrefix + readUnitList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + readUnitList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -136,7 +145,7 @@ public class Delay extends Activity {
 	@PersistentCollection(fetch = FetchType.EAGER)
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle + readGroupList_FIELDNAME, joinIndex = @Index(name = TABLE
 			+ IndexNameMiddle + readGroupList_FIELDNAME + JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = length_255B, name = ColumnNamePrefix + readGroupList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + readGroupList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -167,7 +176,7 @@ public class Delay extends Activity {
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle
 			+ readDataPathList_FIELDNAME, joinIndex = @Index(name = TABLE + IndexNameMiddle + readDataPathList_FIELDNAME
 					+ JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = JpaObject.length_255B, name = ColumnNamePrefix + readDataPathList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + readDataPathList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -178,7 +187,7 @@ public class Delay extends Activity {
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle
 			+ reviewIdentityList_FIELDNAME, joinIndex = @Index(name = TABLE + IndexNameMiddle
 					+ reviewIdentityList_FIELDNAME + JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = length_255B, name = ColumnNamePrefix + reviewIdentityList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + reviewIdentityList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -188,7 +197,7 @@ public class Delay extends Activity {
 	@PersistentCollection(fetch = FetchType.EAGER)
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle + reviewUnitList_FIELDNAME, joinIndex = @Index(name = TABLE
 			+ IndexNameMiddle + reviewUnitList_FIELDNAME + JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = length_255B, name = ColumnNamePrefix + reviewUnitList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + reviewUnitList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -198,7 +207,7 @@ public class Delay extends Activity {
 	@PersistentCollection(fetch = FetchType.EAGER)
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle + reviewGroupList_FIELDNAME, joinIndex = @Index(name = TABLE
 			+ IndexNameMiddle + reviewGroupList_FIELDNAME + JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = length_255B, name = ColumnNamePrefix + reviewGroupList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + reviewGroupList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -229,7 +238,7 @@ public class Delay extends Activity {
 	@ContainerTable(name = TABLE + ContainerTableNameMiddle
 			+ reviewDataPathList_FIELDNAME, joinIndex = @Index(name = TABLE + IndexNameMiddle
 					+ reviewDataPathList_FIELDNAME + JoinIndexNameSuffix))
-	@OrderColumn(name =  ORDERCOLUMNCOLUMN)
+	@OrderColumn(name = ORDERCOLUMNCOLUMN)
 	@ElementColumn(length = JpaObject.length_255B, name = ColumnNamePrefix + reviewDataPathList_FIELDNAME)
 	@ElementIndex(name = TABLE + IndexNameMiddle + reviewDataPathList_FIELDNAME + ElementIndexNameSuffix)
 	@CheckPersist(allowEmpty = true)
@@ -332,20 +341,19 @@ public class Delay extends Activity {
 	@CheckPersist(allowEmpty = true)
 	private String route;
 
-	public static final String delayType_FIELDNAME = "delayType";
-	@Enumerated(EnumType.ORDINAL)
-	@FieldDescribe("延时类型,minute或者until,这个字段由于疏忽导致是使用ORDNAL字段进行存储的.")
-	@Column(name = ColumnNamePrefix + delayType_FIELDNAME)
-	@CheckPersist(allowEmpty = true)
-	private DelayType delayType;
+//	public static final String delayType_FIELDNAME = "delayType";
+//	@Enumerated(EnumType.ORDINAL)
+//	@FieldDescribe("延时类型,minute或者until,这个字段由于疏忽导致是使用ORDNAL字段进行存储的.")
+//	@Column(name = ColumnNamePrefix + delayType_FIELDNAME)
+//	@CheckPersist(allowEmpty = true)
+//	private DelayType delayType;
 
-	// public static final String delayType_FIELDNAME = "delayType";
-	// @Enumerated(EnumType.STRING)
-	// @FieldDescribe("延时类型,minute或者until")
-	// @Column(length = DelayType.length, name = ColumnNamePrefix +
-	// delayType_FIELDNAME)
-	// @CheckPersist(allowEmpty = true)
-	// private DelayType delayType;
+	public static final String delayMode_FIELDNAME = "delayMode";
+	@Enumerated(EnumType.STRING)
+	@FieldDescribe("延时类型,minute或者until")
+	@Column(length = DelayMode.length, name = ColumnNamePrefix + delayMode_FIELDNAME)
+	@CheckPersist(allowEmpty = true)
+	private DelayMode delayMode;
 
 	public static final String delayTime_FIELDNAME = "delayTime";
 	@FieldDescribe("延时至时间.")
@@ -658,14 +666,6 @@ public class Delay extends Activity {
 		this.reviewDataPathList = reviewDataPathList;
 	}
 
-	public DelayType getDelayType() {
-		return delayType;
-	}
-
-	public void setDelayType(DelayType delayType) {
-		this.delayType = delayType;
-	}
-
 	public Date getDelayTime() {
 		return delayTime;
 	}
@@ -728,6 +728,30 @@ public class Delay extends Activity {
 
 	public void setReviewGroupList(List<String> reviewGroupList) {
 		this.reviewGroupList = reviewGroupList;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
+	}
+
+	public String getOpinionGroup() {
+		return opinionGroup;
+	}
+
+	public void setOpinionGroup(String opinionGroup) {
+		this.opinionGroup = opinionGroup;
+	}
+
+	public DelayMode getDelayMode() {
+		return delayMode;
+	}
+
+	public void setDelayMode(DelayMode delayMode) {
+		this.delayMode = delayMode;
 	}
 
 }

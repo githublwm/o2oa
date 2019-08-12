@@ -1,10 +1,12 @@
 package com.x.cms.core.entity.tools;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -13,16 +15,22 @@ import org.apache.commons.lang3.StringUtils;
 import com.x.base.core.entity.JpaObject;
 import com.x.base.core.entity.SliceJpaObject_;
 import com.x.base.core.project.tools.ListTools;
+import com.x.cms.core.entity.Document;
 import com.x.cms.core.entity.tools.filter.QueryFilter;
+import com.x.cms.core.entity.tools.filter.term.DateBetweenTerm;
 import com.x.cms.core.entity.tools.filter.term.EqualsTerm;
 import com.x.cms.core.entity.tools.filter.term.InTerm;
+import com.x.cms.core.entity.tools.filter.term.IsFalseTerm;
+import com.x.cms.core.entity.tools.filter.term.IsTrueTerm;
 import com.x.cms.core.entity.tools.filter.term.LikeTerm;
 import com.x.cms.core.entity.tools.filter.term.MemberTerm;
 import com.x.cms.core.entity.tools.filter.term.NotEqualsTerm;
 import com.x.cms.core.entity.tools.filter.term.NotInTerm;
 import com.x.cms.core.entity.tools.filter.term.NotMemberTerm;
 
+
 public class CriteriaBuilderTools {
+	
 	public static Predicate predicate_or( CriteriaBuilder criteriaBuilder, Predicate predicate, Predicate predicate_target ) {
 		if( predicate == null ) {
 			return predicate_target;	
@@ -166,6 +174,45 @@ public class CriteriaBuilderTools {
 			}
 		}
 		
+		if( ListTools.isNotEmpty( queryFilter.getIsTrueTerms())) {
+			for( IsTrueTerm term : queryFilter.getIsTrueTerms() ) {
+				if( StringUtils.isEmpty( term.getName() )) {
+					continue;
+				}
+				if( "and".equalsIgnoreCase( queryFilter.getJoinType() )) {
+					p = CriteriaBuilderTools.predicate_and( cb, p, cb.isTrue( root.get( cls_.getDeclaredField( term.getName() ).getName() )));
+				} else if( "or".equalsIgnoreCase( queryFilter.getJoinType() )) {
+					p = CriteriaBuilderTools.predicate_or( cb, p, cb.isTrue( root.get( cls_.getDeclaredField( term.getName() ).getName() )));
+				}
+			}
+		}
+		
+		if( ListTools.isNotEmpty( queryFilter.getIsFalseTerms())) {
+			for( IsFalseTerm term : queryFilter.getIsFalseTerms() ) {
+				if( StringUtils.isEmpty( term.getName() )) {
+					continue;
+				}
+				if( "and".equalsIgnoreCase( queryFilter.getJoinType() )) {
+					p = CriteriaBuilderTools.predicate_and( cb, p, cb.isFalse( root.get( cls_.getDeclaredField( term.getName() ).getName() )));
+				} else if( "or".equalsIgnoreCase( queryFilter.getJoinType() )) {
+					p = CriteriaBuilderTools.predicate_or( cb, p, cb.isFalse( root.get( cls_.getDeclaredField( term.getName() ).getName() )));
+				}
+			}
+		}
+		
+		if( ListTools.isNotEmpty( queryFilter.getDateBetweenTerms())) {
+			for( DateBetweenTerm term : queryFilter.getDateBetweenTerms() ) {
+				if( StringUtils.isEmpty( term.getName() ) || term.getValue() == null || ListTools.isEmpty( term.getValue() ) || term.getValue().size() < 2) {
+					continue;
+				}
+				if( "and".equalsIgnoreCase( queryFilter.getJoinType() )) {
+					p = CriteriaBuilderTools.predicate_and( cb, p, cb.between( root.get( cls_.getDeclaredField( term.getName() ).getName() ), term.getValue().get(0), term.getValue().get(1) ));
+				} else if( "or".equalsIgnoreCase( queryFilter.getJoinType() )) {
+					p = CriteriaBuilderTools.predicate_or( cb, p, cb.between( root.get( cls_.getDeclaredField( term.getName() ).getName() ), term.getValue().get(0), term.getValue().get(1) ));
+				}
+			}
+		}
+		
 		//继续递归查询条件
 		if( queryFilter.getAnd() != null  ) {
 			queryFilter.setJoinType( "and" );
@@ -193,10 +240,10 @@ public class CriteriaBuilderTools {
 	 * @return
 	 * @throws Exception
 	 */
-	public <T extends JpaObject, T_ extends SliceJpaObject_> List<T> listNextWithCondition(  EntityManager em, Class<T> cls, Class<T_> cls_, Integer maxCount, 
+	public static <T extends JpaObject, T_ extends SliceJpaObject_> List<T> listNextWithCondition(  EntityManager em, Class<T> cls, Class<T_> cls_, Integer maxCount, 
 			QueryFilter queryFilter, Object sequenceFieldValue,  String orderField, String order ) throws Exception {
 		
-		if( order == null || order.isEmpty() ){
+		if( StringUtils.isEmpty( order ) ){
 			order = "DESC";
 		}
 		if( StringUtils.isEmpty( orderField )){
@@ -231,5 +278,53 @@ public class CriteriaBuilderTools {
 		}
 		
 		return em.createQuery(cq.where(p).distinct(true)).setMaxResults( maxCount ).getResultList();
+	}
+	
+	/**
+	 * 根据条件组织一个排序的语句
+	 * @param <T>
+	 * @param <T_>
+	 * @param cb
+	 * @param root
+	 * @param cls_
+	 * @param fieldName
+	 * @param orderType
+	 * @return
+	 */
+	public static <T extends JpaObject, T_ extends SliceJpaObject_>Order getOrder( CriteriaBuilder cb, Root<T> root, Class<T_> cls_, String fieldName, String orderType ) {
+		if( StringUtils.isEmpty( fieldName )) {
+			fieldName = Document.sequence_FIELDNAME;
+		}
+		
+		Boolean fieldExists = false;
+		if( Document.sequence_FIELDNAME.equalsIgnoreCase( fieldName )) {
+			fieldExists = true;
+			fieldName = Document.sequence_FIELDNAME;
+		}else if( Document.createTime_FIELDNAME.equalsIgnoreCase( fieldName )) {
+			fieldExists = true;
+			fieldName = Document.createTime_FIELDNAME;
+		}else if( Document.updateTime_FIELDNAME.equalsIgnoreCase( fieldName )) {
+			fieldExists = true;
+			fieldName = Document.updateTime_FIELDNAME;
+		}else {
+			Field[] fields = cls_.getDeclaredFields();
+			for( Field field : fields ) {
+				if( field.getName().equalsIgnoreCase( fieldName ) ) {
+					fieldName = field.getName(); //校正排序列的名称避免大小写的影响
+					fieldExists = true;
+				}
+			}
+		}
+		if( !fieldExists ) { //如果排序列不存在，就直接使用sequence，让SQL可以正常执行
+			fieldName = Document.sequence_FIELDNAME;
+		}
+		if( StringUtils.isEmpty( orderType )) {
+			orderType = "desc";
+		}
+		if( "desc".equalsIgnoreCase( orderType )) {
+			return cb.desc( root.get( fieldName ).as(String.class));
+		}else {
+			return cb.asc( root.get( fieldName ).as(String.class));
+		}
 	}
 }

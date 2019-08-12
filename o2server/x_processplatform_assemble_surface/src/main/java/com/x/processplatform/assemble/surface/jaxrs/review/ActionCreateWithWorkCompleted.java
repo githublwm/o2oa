@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.x.base.core.container.EntityManagerContainer;
 import com.x.base.core.container.factory.EntityManagerContainerFactory;
 import com.x.base.core.project.x_processplatform_service_processing;
+import com.x.base.core.project.annotation.FieldDescribe;
 import com.x.base.core.project.exception.ExceptionAccessDenied;
 import com.x.base.core.project.exception.ExceptionEntityNotExist;
 import com.x.base.core.project.gson.GsonPropertyObject;
@@ -30,8 +31,7 @@ class ActionCreateWithWorkCompleted extends BaseAction {
 			if (null == workCompleted) {
 				throw new ExceptionEntityNotExist(wi.getWorkCompleted(), WorkCompleted.class);
 			}
-			WorkCompletedControl control = business.getControl(effectivePerson, workCompleted,
-					WorkCompletedControl.class);
+			WoControl control = business.getControl(effectivePerson, workCompleted, WoControl.class);
 			if (!control.getAllowVisit()) {
 				throw new ExceptionAccessDenied(effectivePerson, workCompleted);
 			}
@@ -49,8 +49,10 @@ class ActionCreateWithWorkCompleted extends BaseAction {
 
 	public static class Wi extends GsonPropertyObject {
 
+		@FieldDescribe("已完成工作")
 		private String workCompleted;
 
+		@FieldDescribe("可阅读人员")
 		private List<String> personList = new ArrayList<>();
 
 		public String getWorkCompleted() {
@@ -72,6 +74,9 @@ class ActionCreateWithWorkCompleted extends BaseAction {
 	}
 
 	public static class Wo extends WrapBoolean {
+	}
+
+	public static class WoControl extends WorkCompletedControl {
 	}
 
 }

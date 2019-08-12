@@ -3,9 +3,10 @@ package com.x.cms.common.image.maincolor;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
+import com.x.base.core.project.tools.ListTools;
 
 public class ImageMainColorUtil {
 	
@@ -33,7 +34,7 @@ public class ImageMainColorUtil {
 		return point;
 	}
 
-	public boolean isEnd(List<PointGroup> rootPoint) {
+	public boolean isEnd( List<PointGroup> rootPoint ) {
 		Point oldpoint = new Point();
 		Point newpoint = new Point();
 		for (PointGroup pointGroup : rootPoint) {
@@ -200,7 +201,7 @@ public class ImageMainColorUtil {
 		default:
 			break;
 		}
-		if( pointList == null || pointList.isEmpty() ){
+		if( ListTools.isEmpty( pointList ) ){
 			if( removedCount_white > removedCount_black ){
 				pointList.add( new Point(220,220,220) );
 			}else{

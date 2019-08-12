@@ -16,8 +16,8 @@ import com.x.base.core.entity.JpaObject;
 import com.x.base.core.project.config.Config;
 import com.x.base.core.project.logger.Logger;
 import com.x.base.core.project.logger.LoggerFactory;
-import com.x.base.core.project.organization.Trust;
-import com.x.base.core.project.organization.TrustLog;
+import com.x.base.core.project.organization.EmpowerLog;
+import com.x.base.core.project.organization.Empower;
 import com.x.base.core.project.tools.DateTools;
 import com.x.base.core.project.tools.ListTools;
 import com.x.base.core.project.tools.NumberTools;
@@ -188,7 +188,7 @@ public class ManualProcessor extends AbstractManualProcessor {
 
 		aeiObjects.getWork().setManualTaskIdentityList(taskIdentities.identities());
 
-		List<Trust> trusts = aeiObjects.business().organization().trust().listWithIdentityObject(
+		List<Empower> trusts = aeiObjects.business().organization().empower().listWithIdentityObject(
 				aeiObjects.getWork().getApplication(), aeiObjects.getWork().getProcess(),
 				aeiObjects.getWork().getManualTaskIdentityList());
 
@@ -228,11 +228,11 @@ public class ManualProcessor extends AbstractManualProcessor {
 	@Override
 	protected List<Route> inquiring(AeiObjects aeiObjects, Manual manual) throws Exception {
 		List<Route> results = new ArrayList<>();
-		/** 仅有单条路由 */
+		/* 仅有单条路由 */
 		if (aeiObjects.getRoutes().size() == 1) {
 			results.add(aeiObjects.getRoutes().get(0));
 		} else if (aeiObjects.getRoutes().size() > 1) {
-			/** 存在多条路由 */
+			/* 存在多条路由 */
 			List<TaskCompleted> taskCompletedList = aeiObjects.getTaskCompleteds().stream()
 					.filter(o -> StringUtils.equals(o.getActivityToken(), aeiObjects.getWork().getActivityToken())
 							&& aeiObjects.getWork().getManualTaskIdentityList().contains(o.getIdentity())
@@ -263,7 +263,7 @@ public class ManualProcessor extends AbstractManualProcessor {
 				});
 		/* 进行独占路由的判断 */
 		Route soleRoute = routes.stream().filter(o -> BooleanUtils.isTrue(o.getSole())).findFirst().orElse(null);
-		if (null != soleRoute) {
+		if ((null != soleRoute) && os.contains(soleRoute.getName())) {
 			result = soleRoute.getName();
 		} else {
 			/* 进行默认的策略,选择占比多的 */
@@ -569,15 +569,15 @@ public class ManualProcessor extends AbstractManualProcessor {
 		}
 		this.calculateExpire(aeiObjects, manual, task);
 		if (StringUtils.isNotEmpty(taskIdentity.getFromIdentity())) {
-			aeiObjects.business().organization().trustLog()
-					.log(this.createTrustLog(aeiObjects.getWork(), taskIdentity));
+			aeiObjects.business().organization().empowerLog()
+					.log(this.createEmpowerLog(aeiObjects.getWork(), taskIdentity));
 			task.setTrustIdentity(taskIdentity.getFromIdentity());
 		}
 		return task;
 	}
 
-	private TrustLog createTrustLog(Work work, TaskIdentity taskIdentity) {
-		TrustLog trustLog = new TrustLog().setApplication(work.getApplication())
+	private EmpowerLog createEmpowerLog(Work work, TaskIdentity taskIdentity) {
+		EmpowerLog empowerLog = new EmpowerLog().setApplication(work.getApplication())
 				.setApplicationAlias(work.getApplicationAlias()).setApplicationName(work.getApplicationName())
 				.setProcess(work.getProcess()).setProcessAlias(work.getProcessAlias())
 				.setProcessName(work.getProcessName()).setTitle(work.getTitle()).setWork(work.getId())
@@ -585,7 +585,7 @@ public class ManualProcessor extends AbstractManualProcessor {
 				.setToIdentity(taskIdentity.getIdentity()).setActivity(work.getActivity())
 				.setActivityAlias(work.getActivityAlias()).setActivityName(work.getActivityName())
 				.setTrustTime(new Date());
-		return trustLog;
+		return empowerLog;
 	}
 
 	public class ExpireScriptResult {

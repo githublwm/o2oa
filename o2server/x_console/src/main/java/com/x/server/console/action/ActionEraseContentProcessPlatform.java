@@ -6,28 +6,28 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.openjpa.persistence.OpenJPAPersistence;
 
-import com.x.base.core.container.EntityManagerContainer;
-import com.x.base.core.container.factory.EntityManagerContainerFactory;
+import com.x.base.core.container.factory.PersistenceXmlHelper;
 import com.x.base.core.entity.JpaObject;
 import com.x.base.core.entity.StorageObject;
 import com.x.base.core.entity.dataitem.DataItem;
 import com.x.base.core.entity.dataitem.ItemCategory;
 import com.x.base.core.project.config.Config;
-import com.x.base.core.project.config.DataMappings;
 import com.x.base.core.project.config.StorageMapping;
 import com.x.base.core.project.config.StorageMappings;
 import com.x.base.core.project.logger.Logger;
 import com.x.base.core.project.logger.LoggerFactory;
 import com.x.base.core.project.tools.DateTools;
 import com.x.base.core.project.tools.ListTools;
-import com.x.base.core.project.tools.StringTools;
 import com.x.processplatform.core.entity.content.Attachment;
 import com.x.processplatform.core.entity.content.Hint;
 import com.x.processplatform.core.entity.content.Read;
@@ -49,7 +49,7 @@ public class ActionEraseContentProcessPlatform {
 
 	private String name;
 
-	private List<Class<?>> classes = new ArrayList<>();
+	private List<String> classNames = new ArrayList<>();
 
 	private ItemCategory itemCategory;
 
@@ -76,7 +76,7 @@ public class ActionEraseContentProcessPlatform {
 	}
 
 	protected void addClass(Class<?> cls) throws Exception {
-		this.classes.add(cls);
+		this.classNames.add(cls.getName());
 	}
 
 	protected void init(String name, ItemCategory itemCategory) throws Exception {
@@ -87,27 +87,29 @@ public class ActionEraseContentProcessPlatform {
 
 	protected void run() throws Exception {
 		logger.print("clean {} content data, start at {}.", name, DateTools.format(start));
-		DataMappings mappings = Config.dataMappings();
+		this.classNames = ListUtils.intersection(this.classNames,
+				(List<String>) Config.resource(Config.RESOUCE_CONTAINERENTITYNAMES));
 		StorageMappings storageMappings = Config.storageMappings();
-		File orm = this.createPersistenceXml(classes, mappings);
-		EntityManagerContainerFactory.init(orm.getName());
-		try (EntityManagerContainer emc = EntityManagerContainerFactory.instance().create()) {
-			for (int i = 0; i < classes.size(); i++) {
-				Class<JpaObject> cls = (Class<JpaObject>) classes.get(i);
-				EntityManager em = emc.get(cls);
-				try {
-					if (DataItem.class.isAssignableFrom(cls)) {
-						logger.print("erase {} content data:{}, total:{}.", name, cls.getName(),
-								this.estimateItemCount(em, cls));
-						this.eraseItem(cls, em);
-					} else {
-						logger.print("erase {} content data:{}, total:{}.", name, cls.getName(),
-								this.estimateCount(em, cls));
-						this.erase(cls, em, storageMappings);
-					}
-				} finally {
-					System.gc();
+		File persistence = new File(Config.dir_local_temp_classes(),
+				DateTools.compact(this.start) + "_eraseContent.xml");
+		PersistenceXmlHelper.write(persistence.getAbsolutePath(), classNames);
+		for (int i = 0; i < classNames.size(); i++) {
+			Class<? extends JpaObject> cls = (Class<? extends JpaObject>) Class.forName(classNames.get(i));
+			EntityManagerFactory emf = OpenJPAPersistence.createEntityManagerFactory(cls.getName(),
+					persistence.getName(), PersistenceXmlHelper.properties(cls.getName(), Config.slice().getEnable()));
+			EntityManager em = emf.createEntityManager();
+			try {
+				if (DataItem.class.isAssignableFrom(cls)) {
+					logger.print("erase {} content data:{}, total:{}.", name, cls.getName(),
+							this.estimateItemCount(em, cls));
+					this.eraseItem(cls, em);
+				} else {
+					logger.print("erase {} content data:{}, total:{}.", name, cls.getName(),
+							this.estimateCount(em, cls));
+					this.erase(cls, em, storageMappings);
 				}
+			} finally {
+				System.gc();
 			}
 		}
 		Date end = new Date();
@@ -150,7 +152,7 @@ public class ActionEraseContentProcessPlatform {
 						if (null != mapping) {
 							storageObject.deleteContent(mapping);
 						} else {
-							System.out.println("can not find storage mapping:" + name + ".");
+							logger.print("can not find storage mapping: {}.", name);
 						}
 					}
 				}
@@ -185,13 +187,5 @@ public class ActionEraseContentProcessPlatform {
 			list = em.createQuery(cq).setMaxResults(1000).getResultList();
 		} while (ListTools.isNotEmpty(list));
 		return count;
-	}
-
-	/** 创建临时使用的persistence.xml 并复制到class目录下 */
-	private File createPersistenceXml(List<Class<?>> clsList, DataMappings mappings) throws Exception {
-		File dir = new File(Config.base(), "local/temp/classes");
-		File xml = new File(dir, StringTools.uniqueToken() + "_eraseContent.xml");
-		PersistenceXmlHelper.createPersistenceXml(clsList, mappings, xml);
-		return xml;
 	}
 }

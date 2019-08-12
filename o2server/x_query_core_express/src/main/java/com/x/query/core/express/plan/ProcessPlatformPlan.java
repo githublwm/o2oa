@@ -455,7 +455,5 @@ public class ProcessPlatformPlan extends Plan {
 						cb.lessThanOrEqualTo(root.get(WorkCompleted_.completedTime), this.dateRange.completed));
 			}
 		}
-
 	}
-
 }
